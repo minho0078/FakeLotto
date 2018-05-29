@@ -10,11 +10,28 @@
     <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>
 
     <style>
-        html, body{padding:0px;margin:0px;width:100%;height:100%;}
+        html, body{padding:0px;margin:0px;width:100%;height:100%;
+            background-image: url("https://img.buzzfeed.com/buzzfeed-static/static/2018-04/2/21/asset/buzzfeed-prod-web-09/sub-buzz-12322-1522718657-1.jpg?downsize=715:*&output-format=auto&output-quality=auto");
+            -webkit-background-size: cover;
+            background-size: cover;
+            background-position: top;
+        }
+        button{margin-left:20px;margin-right:20px;box-shadow:none !important;}
+        #buy_lotto_auto:active{background-color:#f0555c;}
+        #buy_lotto_manual:active{background-color:#08baf5;}
+
         #lotto_box{width:100%;height:100%;float:left;margin:0 auto;text-align: center;}
-        .ul_default{list-style: none;padding:0px;margin-top:30px;}
-        .box{border:1px solid #000000;border-radius:20px;outline: none;}
-        .box_input{display:inline-block;width:15%;height:100px;line-height: 100px;text-align: center;font-size:50px;}
+        .ul_default{list-style: none;padding:0px;margin-top:50%;}
+        .box{border:0px solid #000000;border-radius:50%;outline: none;}
+        .box_input{display:inline-block;width:15%;height:100px;line-height: 100px;text-align: center;font-size:8vw;zoom: 1; /* ie 5,6,7 bug fix */ filter: alpha(opacity=70); opacity: 0.7;}
+
+        .bg-yellow{background-color:#f9b704;}
+        .bg-blue{background-color:#08baf5;}
+        .bg-red{background-color:#f0555c;}
+        .bg-black{background-color:#a09fa0;}
+        .bg-green{background-color:#9cd234;}
+
+        .btn-round{border-radius: 24px;}
     </style>
     <script>
         $(window).resize(function(){
@@ -37,12 +54,32 @@
                 }
             });
 
-            $('#buy_lotto').click(function(){
+            $('#buy_lotto_auto').click(function(){
                 var numbers = randomNumber();
                 // Ajax로 서버로 보내서 DB에 저장함.
                 var queryString = "";
+
+                var object_lotto_number;
+                var object_lotto_number_color;
                 for(var i=0, len=numbers.length; i<len; i++){
-                    $('#number_'+(i+1)).text(numbers[i]);
+
+                    object_lotto_number = $('#number_'+(i+1));
+                    object_lotto_number.text(numbers[i]);
+
+                    if(numbers[i] < 11){
+                        object_lotto_number_color = "bg-yellow";
+                    }else if(numbers[i] > 10 && numbers[i] < 21 ){
+                        object_lotto_number_color = "bg-blue";
+                    }else if(numbers[i] > 20 && numbers[i] < 31){
+                        object_lotto_number_color = "bg-red";
+                    }else if(numbers[i] > 30 && numbers[i] < 41){
+                        object_lotto_number_color = "bg-black";
+                    }else{
+                        object_lotto_number_color = "bg-green";
+                    }
+
+                    object_lotto_number.addClass(object_lotto_number_color);
+
 
                     if(i>0){
                         queryString += "&";
@@ -120,8 +157,9 @@
             <li class="box box_input number" id="number_5" contenteditable="true" ></li>
             <li class="box box_input number" id="number_6" contenteditable="true" ></li>
         </ul>
-        <input type="number" id="game_times"/>회
-        <button id="buy_lotto">get</button>
+        <!--<input type="number" id="game_times"/>회 -->
+        <button class="btn btn-lg btn-round" id="buy_lotto_auto">자동 발급</button>
+        <button class="btn btn-lg btn-round" id="buy_lotto_manual">수동 등록</button>
     </div>
 
 </body>
