@@ -20,4 +20,7 @@ from makeLotto import views
 urlpatterns = (
     url(r'^admin/', admin.site.urls),
     url(r'^$', views.index),
+    url(r'^winner/', views.winner),
+    url(r'^no_view/', views.no_view),
+    url(r'^insert/', views.insert),
 )
