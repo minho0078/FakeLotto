@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from .models import *
 from datetime import datetime
+from django.utils import timezone
 from django.shortcuts import render
 from django.http import HttpResponse
 from bs4 import BeautifulSoup
@@ -15,8 +16,6 @@ def index(request):
 
 
 def insert(request):
-    print(request.GET.get("number1"))
-
     lotto = LottoThisWeek(number1=request.GET.get("number1"),
                           number2=request.GET.get("number2"),
                           number3=request.GET.get("number3"),
@@ -24,7 +23,7 @@ def insert(request):
                           number5=request.GET.get("number5"),
                           number6=request.GET.get("number6"),
                           isWin=0,
-                          createDate=datetime.now())
+                          createDate=datetime.now(tz=timezone.utc),)
     lotto.save()
 
     return HttpResponse("success")
@@ -46,9 +45,8 @@ def no_view(request):
     no_view_lotto_numbers = []
 
     for imgTag in array_td:
-
         no_view_lotto_numbers.append(str(imgTag.get("alt")).replace("번", ""))
-    print(array_td[0].get("alt"))
+
     return HttpResponse(json.dumps(no_view_lotto_numbers, sort_keys=True))
 
 def parser(url):

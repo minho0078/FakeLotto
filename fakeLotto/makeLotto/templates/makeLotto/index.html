@@ -1,17 +1,16 @@
+{% load staticfiles %}
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
-    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>
+    <link rel="stylesheet" href="{% static 'framework/bootstrap-4.1.1/css/bootstrap.min.css' %}"/>
+    <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
+    <script src="{% static 'framework/bootstrap-4.1.1/js/bootstrap.min.js' %}"></script>
 
     <style>
         html, body{padding:0px;margin:0px;width:100%;height:100%;
-            background-image: url("https://img.buzzfeed.com/buzzfeed-static/static/2018-04/2/21/asset/buzzfeed-prod-web-09/sub-buzz-12322-1522718657-1.jpg?downsize=715:*&output-format=auto&output-quality=auto");
+            background-image: url('{% static "/background.png" %}');
             -webkit-background-size: cover;
             background-size: cover;
             background-position: top;
@@ -32,8 +31,14 @@
         .bg-green{background-color:#9cd234;}
 
         .btn-round{border-radius: 24px;}
+
+        #option_box{width:100%;padding:20px 0px;}
+        .custom_number_input{width:100px;border-radius: 5px;outline:none;-moz-appearance: none;}
+
     </style>
     <script>
+        var array_no_view_number;
+
         $(window).resize(function(){
                resizeBox();
         });
@@ -54,52 +59,17 @@
                 }
             });
 
+            $('#option_except_no_views').keyup(function(){
+                console.log($(this).val());
+                setNoViewNumber($(this).val());
+            });
+
             $('#buy_lotto_auto').click(function(){
-                var numbers = randomNumber();
-                // Ajax로 서버로 보내서 DB에 저장함.
-                var queryString = "";
-
-                var object_lotto_number;
-                var object_lotto_number_color;
-                for(var i=0, len=numbers.length; i<len; i++){
-
-                    object_lotto_number = $('#number_'+(i+1));
-                    object_lotto_number.text(numbers[i]);
-
-                    if(numbers[i] < 11){
-                        object_lotto_number_color = "bg-yellow";
-                    }else if(numbers[i] > 10 && numbers[i] < 21 ){
-                        object_lotto_number_color = "bg-blue";
-                    }else if(numbers[i] > 20 && numbers[i] < 31){
-                        object_lotto_number_color = "bg-red";
-                    }else if(numbers[i] > 30 && numbers[i] < 41){
-                        object_lotto_number_color = "bg-black";
-                    }else{
-                        object_lotto_number_color = "bg-green";
-                    }
-
-                    object_lotto_number.addClass(object_lotto_number_color);
-
-
-                    if(i>0){
-                        queryString += "&";
-                    }
-                    queryString +="number"+(i+1)+"="+numbers[i];
-                }
-
-                $.ajax({
-                    url:"insert",
-                    method: "get",
-                    data:queryString,
-                    success:function(res){
-                        console.log("success");
-                    }
-                });
-
+                var queryString = adoptNumber(randomNumber());
+                insertNumber(queryString);
             });
 
             // DB에 저장된 금주 번호 호출 - 화면에 번호 뿌려주기~
-
         });
 
         function init(){
@@ -120,8 +90,10 @@
             var idx = 0;
 
             //46 숫자 저장
-            for (var i = 1; i < 46; ++i){
-                aryLotto.push(i)
+            for (var i = 1; i < 47; i++){
+                if(!array_no_view_number.includes(i)){
+                    aryLotto.push(i);
+                }
             }
 
             //중복없이 6칸이 채월질때까지 반복
@@ -130,6 +102,7 @@
                 myLotto.push(aryLotto[idx]);
                 aryLotto.splice(idx,1);
             }
+
             //정렬
             myLotto.sort(sortNumber);
 
@@ -145,6 +118,66 @@
         function sortNumber(a, b) {
              return a - b;
         }
+
+        function setNoViewNumber(period){
+            $.ajax({
+                url:"no_view",
+                method: "get",
+                data:"period="+period,
+                success:function(res){
+                    array_no_view_number = res;
+                }
+            });
+        }
+
+        function insertNumber(){
+            $.ajax({
+                url:"insert",
+                method: "get",
+                data:queryString,
+                success:function(res){
+                    console.log("success");
+                }
+            });
+        }
+
+        function adoptNumber(numbers){
+            // Ajax로 서버로 보내서 DB에 저장함.
+                var queryString = "";
+
+                var object_lotto_number;
+                var object_lotto_number_color;
+
+                for(var i=0, len=numbers.length; i<len; i++){
+
+                    object_lotto_number = $('#number_'+(i+1));
+                    object_lotto_number.text(numbers[i]);
+
+                    if(numbers[i] < 11){
+                        object_lotto_number_color = "bg-yellow";
+                    }else if(numbers[i] > 10 && numbers[i] < 21 ){
+                        object_lotto_number_color = "bg-blue";
+                    }else if(numbers[i] > 20 && numbers[i] < 31){
+                        object_lotto_number_color = "bg-red";
+                    }else if(numbers[i] > 30 && numbers[i] < 41){
+                        object_lotto_number_color = "bg-black";
+                    }else if(numbers[i] > 40){
+                        object_lotto_number_color = "bg-green";
+                    }
+
+                    object_lotto_number.removeClass();
+                    object_lotto_number.addClass("box box_input number "+object_lotto_number_color);
+
+
+                    if(i>0){
+                        queryString += "&";
+                    }
+                    queryString +="number"+(i+1)+"="+numbers[i];
+                }
+
+                return queryString;
+        }
+
     </script>
 </head>
 <body>
@@ -158,6 +191,10 @@
             <li class="box box_input number" id="number_6" contenteditable="true" ></li>
         </ul>
         <!--<input type="number" id="game_times"/>회 -->
+        <div id="option_box" >
+            <div>[옵션 1] 최근 <input type="number" id="option_except_no_views" class="custom_number_input"/> 주간 미출현 번호 제외</div>
+
+        </div>
         <button class="btn btn-lg btn-round" id="buy_lotto_auto">자동 발급</button>
         <button class="btn btn-lg btn-round" id="buy_lotto_manual">수동 등록</button>
     </div>
